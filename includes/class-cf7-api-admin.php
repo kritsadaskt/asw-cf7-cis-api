@@ -87,8 +87,39 @@ class QS_CF7_api_admin{
 
     //add_action( 'wp_footer' ,array( $this , 'redirect_cf7' ) );
 
+    add_filter('wpcf7_validate_email*', array($this, "qs_validation_email_blacklist"), 20, 2 );
+
 	add_action( 'wp_enqueue_scripts' ,array( $this , "qs_load_scripts" ) );
 
+  }
+
+  function qs_validation_email_blacklist( $result, $tag ) {
+    //Define Blacklist Email
+    $bList = array(
+      "Chochompu.1502@gmail.com",
+      "chochompu.1502@gmail.com",
+      "Zz656633@gmail.com",
+      "h.f@gmail.con",
+      "h.f@gmail.com",
+      "hhhu.ss@gmail.com",
+      "narongchai.t@gmail.com",
+      "kmnvcxz2804@gmail.com",
+      "Zz6562633@gmail.com",
+      "Zz656633@gmail.com",
+      "viyada@gmail.com",
+    );
+
+    if ('contact-email' == $tag->name) {
+      $apply_email = isset($_POST['contact-email']) ? trim($_POST['contact-email']) : '';
+
+      if (in_array($apply_email, $bList)) {
+//        ChromePhp::log($apply_email);
+        $result->invalidate($tag, "Something went wrong :(");
+        //die();
+      }
+    }
+
+    return $result;
   }
 
   function qs_load_scripts() {
@@ -327,85 +358,108 @@ class QS_CF7_api_admin{
 
 	$log = new Logger(plugin_dir_path( __DIR__ )."log/cis.html");
 	$sms_log = new Logger(plugin_dir_path( __DIR__ )."log/sms.html");
+	// $test = new Logger(plugin_dir_path( __DIR__ )."log/test.html"); # for debug any variables
 
     /* check if the form is marked to be sent via API */
     if( isset( $qs_cf7_data["send_to_cis"] ) && $qs_cf7_data["send_to_cis"] == "on" && $submission ){
 
-        $record['fields'] = array(
-        	  'ProjectID'           => $posted_data['project-id'],
-        	  'ContactChannelID'    => 21,
-        	  'ContactTypeID'       => 35,
-        	  'RefID'               => $posted_data['ref-id'],
-        	  'Fname'               => $posted_data['contact-name'],
-        	  'Lname'               => $posted_data['contact-surname'],
-        	  'Tel'                 => $posted_data['contact-tel'],
-        	  'Email'               => $posted_data['contact-email'],
-        	  'Ref'                 => $posted_data['ref'],
-        	  'RefDate'             => date("Y-m-d H:i:s"),
-            'FollowUpID'          => 42,
-            'utm_source'          => $posted_data['utm_source'],
-            'utm_medium'          => $posted_data['utm_medium'],
-            'utm_campaign'        => $posted_data['utm_campaign'],
-            'utm_term'            => $posted_data['utm_term'],
-            'utm_content'         => $posted_data['utm_content']
-        );
+      $contactAccept = 'true';
 
-        $record['url'] = $qs_cf7_data['base_cis_url'];
+      if($posted_data['contact-accept'] === '') {
+         $contactAccept = 'false';
+      }
 
-        do_action( 'qs_cf7_api_before_sent_to_api' , $record );
+      $record['fields'] = array(
+        'ProjectID'           => $posted_data['project-id'],
+        'ContactChannelID'    => 21,
+        'ContactTypeID'       => 35,
+        'RefID'               => $posted_data['ref-id'],
+        'Fname'               => $posted_data['contact-name'],
+        'Lname'               => $posted_data['contact-surname'],
+        'Tel'                 => $posted_data['contact-tel'],
+        'Email'               => $posted_data['contact-email'],
+        'Ref'                 => $posted_data['ref'],
+        'RefDate'             => date("Y-m-d H:i:s"),
+        'FollowUpID'          => 42,
+        'utm_source'          => $posted_data['utm_source'],
+        'utm_medium'          => $posted_data['utm_medium'],
+        'utm_campaign'        => $posted_data['utm_campaign'],
+        'utm_term'            => $posted_data['utm_term'],
+        'utm_content'         => $posted_data['utm_content'],
+        'PriceInterest'       => implode("",$posted_data['price-rate']),
+        'ModelInterest'       => implode("",$posted_data['room-type']),
+        'PromoCode'           => $posted_data['promo-code'],
+        'FlagPersonalAccept'  => 'true',
+        'FlagContactAccept'   => $contactAccept,
+        'AppointDate'         => $posted_data['AppointDate'],
+        'AppointTime'         => $posted_data['AppointTime'] ? implode("",$posted_data['AppointTime']) : "",
+        'AppointTimeEnd'      => $posted_data['AppointTimeEnd'] ? implode("",$posted_data['AppointTimeEnd']) : ""
+      );
 
-        $response = $this->send_lead($record, true);
+      // $gg = json_encode($record['fields']); # change array to string
+      // $test->setTimestamp("Y-m-d H:i:s"); # set timestamp
+      // $test->putLog($gg); # for debug $record['fields']
 
-        if( is_wp_error( $response ) ) {
-	        $log->setTimestamp("Y-m-d H:i:s");
-	        $log->putLog('[Form ID: ]'.$WPCF7_ContactForm->id().' Server Error');
-        } else {
-          $obj = json_decode($response['body']);
-          $status = $obj->Success ? 'Success' : 'Fail';
-          $user_email = explode('@', $posted_data['contact-email']);
-          $hidden_user = substr($user_email[0], 0, -3) . 'xxx';
-          $hidden_number = substr($posted_data['contact-tel'], 0, -4) . 'xxxx';
 
-          if($status) {
-	          $log->setTimestamp("Y-m-d H:i:s");
-	          $log->putLog('[Form ID : '.$WPCF7_ContactForm->id().' | Email : '.$hidden_user.'@'.$user_email[1].'] CIS : '.$status);
+      $record['url'] = $qs_cf7_data['base_cis_url'];
 
-	          /* check if the form is marked to be sent via SMS */
-	          if( isset( $qs_cf7_data["send_to_sms"] ) && $qs_cf7_data["send_to_sms"] == "on" && $submission ){
+      do_action( 'qs_cf7_api_before_sent_to_api' , $record );
 
-		          $record = array(
-			          'tel'                 => $posted_data['contact-tel'],
-			          'username'            => $qs_cf7_data['base_sms_user'],
-			          'password'            => $qs_cf7_data['base_sms_pass'],
-			          'sender'              => $qs_cf7_data['base_sms_sender'],
-			          'text'                => $qs_cf7_data['base_sms_text'],
-		          );
+      $response = $this->send_lead($record, true);
 
-		          $url = $qs_cf7_data['base_sms_url'];
+      if( is_wp_error( $response ) ) {
+        $log->setTimestamp("Y-m-d H:i:s");
+        $log->putLog('[Form ID: ]'.$WPCF7_ContactForm->id().' Server Error');
+      } else {
+        $obj = json_decode($response['body']);
+        $status = $obj->Success ? 'Success' : 'Fail';
+        $user_email = explode('@', $posted_data['contact-email']);
+        $hidden_user = substr($user_email[0], 0, -3) . 'xxx';
+        $hidden_number = substr($posted_data['contact-tel'], 0, -4) . 'xxxx';
 
-		          do_action( 'qs_cf7_api_before_sent_to_sms' , $record, $url );
+        // $test->setTimestamp("Y-m-d H:i:s"); # for set Timestamp
+        // $test->putLog($response['body']); # for debug $response from CIS
 
-		          $response = $this->send_sms($record, $url);
+        if($status) {
+          $log->setTimestamp("Y-m-d H:i:s");
+          $log->putLog('[Form ID : '.$WPCF7_ContactForm->id().' | Email : '.$hidden_user.'@'.$user_email[1].'] CIS : '.$status);
 
-		          $status = strip_tags($response->STATUS[0]);
-		          $detail = strip_tags($response->DETAIL[0]);
+          /* check if the form is marked to be sent via SMS */
+          if( isset( $qs_cf7_data["send_to_sms"] ) && $qs_cf7_data["send_to_sms"] == "on" && $submission ){
 
-		          if( $status !== "000" ){
-			          $sms_log->setTimestamp("Y-m-d H:i:s");
-			          $sms_log->putLog('[Form ID : '.$WPCF7_ContactForm->id().' | Tel : '.$hidden_number.'] SMS : Fail ('.$detail.')');
-		          } else {
-			          $sms_log->setTimestamp("Y-m-d H:i:s");
-			          $sms_log->putLog('[Form ID : '.$WPCF7_ContactForm->id().' | Tel : '.$hidden_number.'] SMS : Success');
-			          do_action( 'qs_cf7_api_after_sent_to_api' , $record , $response );
-		          }
-	          } else {
-		          do_action( 'qs_cf7_api_after_sent_to_api' , $record , $response );
-	          }
+            $record = array(
+              'tel'                 => $posted_data['contact-tel'],
+              'username'            => $qs_cf7_data['base_sms_user'],
+              'password'            => $qs_cf7_data['base_sms_pass'],
+              'sender'              => $qs_cf7_data['base_sms_sender'],
+              'text'                => $qs_cf7_data['base_sms_text'],
+            );
+
+            $url = $qs_cf7_data['base_sms_url'];
+
+            do_action( 'qs_cf7_api_before_sent_to_sms' , $record, $url );
+
+            $response = $this->send_sms($record, $url);
+
+            $status = strip_tags($response->STATUS[0]);
+            $detail = strip_tags($response->DETAIL[0]);
+
+            if( $status !== "000" ){
+              $sms_log->setTimestamp("Y-m-d H:i:s");
+              $sms_log->putLog('[Form ID : '.$WPCF7_ContactForm->id().' | Tel : '.$hidden_number.'] SMS : Fail ('.$detail.')');
+            } else {
+              $sms_log->setTimestamp("Y-m-d H:i:s");
+              $sms_log->putLog('[Form ID : '.$WPCF7_ContactForm->id().' | Tel : '.$hidden_number.'] SMS : Success');
+              do_action( 'qs_cf7_api_after_sent_to_api' , $record , $response );
+            }
           } else {
-	          $log->setTimestamp("Y-m-d H:i:s");
-	          $log->putLog('[Form ID : '.$WPCF7_ContactForm->id().' | Email : '.$hidden_user.'@'.$user_email[1].'] CIS : '.$status.' ('.$obj->Message.')');
+            do_action( 'qs_cf7_api_after_sent_to_api' , $record , $response );
           }
+        } else {
+          $log->setTimestamp("Y-m-d H:i:s");
+          $log->putLog('[Form ID : '.$WPCF7_ContactForm->id().' | Email : '.$hidden_user.'@'.$user_email[1].'] CIS : '.$status.' ('.$obj->Message.')');
         }
+      }
     }
   }
 

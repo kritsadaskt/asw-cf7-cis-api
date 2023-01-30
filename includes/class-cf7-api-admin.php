@@ -332,29 +332,22 @@ class QS_CF7_api_admin{
     if( isset( $qs_cf7_data["send_to_cis"] ) && $qs_cf7_data["send_to_cis"] == "on" && $submission ){
 
         $record['fields'] = array(
-          'ProjectID'           => $posted_data['project-id'],
-          'ContactChannelID'    => 21,
-          'ContactTypeID'       => 35,
-          'RefID'               => $posted_data['ref-id'],
-          'Fname'               => $posted_data['contact-name'],
-          'Lname'               => $posted_data['contact-surname'],
-          'Tel'                 => $posted_data['contact-tel'],
-          'Email'               => $posted_data['contact-email'],
-          'Ref'                 => $posted_data['ref'],
-          'RefDate'             => date("Y-m-d H:i:s"),
-          'FollowUpID'          => 42,
-          'utm_source'          => $posted_data['utm_source'],
-          'utm_medium'          => $posted_data['utm_medium'],
-          'utm_campaign'        => $posted_data['utm_campaign'],
-          'utm_term'            => $posted_data['utm_term'],
-          'utm_content'         => $posted_data['utm_content'],
-          'PriceInterest'       => $posted_data['PriceInterest'],
-          'ModelInterest'       => $posted_data['ModelInterest'],
-          'PromoCode'           => $posted_data['PromoCode'],
-          'FlagPersonalAccept'  => $posted_data['FlagPersonalAccept'],
-          'FlagContactAccept'   => $posted_data['FlagContactAccept'],
-          'AppointDate'         => $posted_data['AppointDate'],
-          'AppointTime'         => $posted_data['AppointTime']
+        	  'ProjectID'           => $posted_data['project-id'],
+        	  'ContactChannelID'    => 21,
+        	  'ContactTypeID'       => 35,
+        	  'RefID'               => $posted_data['ref-id'],
+        	  'Fname'               => $posted_data['contact-name'],
+        	  'Lname'               => $posted_data['contact-surname'],
+        	  'Tel'                 => $posted_data['contact-tel'],
+        	  'Email'               => $posted_data['contact-email'],
+        	  'Ref'                 => $posted_data['ref'],
+        	  'RefDate'             => date("Y-m-d H:i:s"),
+            'FollowUpID'          => 42,
+            'utm_source'          => $posted_data['utm_source'],
+            'utm_medium'          => $posted_data['utm_medium'],
+            'utm_campaign'        => $posted_data['utm_campaign'],
+            'utm_term'            => $posted_data['utm_term'],
+            'utm_content'         => $posted_data['utm_content']
         );
 
         $record['url'] = $qs_cf7_data['base_cis_url'];

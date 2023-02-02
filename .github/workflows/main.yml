@@ -25,4 +25,4 @@ jobs:
       with:
         server: ftp.kavecondo.com
         username: kavecondo
-        password: ${{ secrets.password }}
+        password: ${{ secrets.KAVE_PWD }}

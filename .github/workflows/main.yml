@@ -1,28 +1,18 @@
-on: 
+name: CI -> Deploy to My website
+on:
   push:
-    branches: ['deploy']
-name: 🚀 Deploy website on push
+    branches: [ deploy ]
 jobs:
-  web-deploy:
-    name: 🎉 Deploy
+  build:
     runs-on: ubuntu-latest
     steps:
-    - name: 🚚 Get latest code
-      uses: actions/checkout@v3
-
-    - name: Use Node.js 16
-      uses: actions/setup-node@v2
-      with:
-        node-version: '16'
-      
-    - name: 🔨 Build Project
-      run: |
-        npm install
-        npm run build
-    
-    - name: 📂 Sync files
-      uses: SamKirkland/FTP-Deploy-Action@4.3.3
-      with:
-        server: ftp.kavecondo.com
-        username: kavecondo
-        password: ${{ secrets.KAVE_PWD }}
+      - uses: actions/checkout@v2
+      # Here is the deployment action
+      - name: Upload from public_html via FTP
+        uses: airvzxf/ftp-deployment-action@latest
+        with:
+          server: ftp.kavecondo.com
+          user: kavecondo
+          password: ${{ secrets.KAVE_PWD }}
+          remote_dir: "./public_html/test_deploy"
+          delete: "false"

@@ -11,7 +11,7 @@ jobs:
     - name: Upload ftp
       uses: sebastianpopp/ftp-action@releases/v2
       with:
-        host: ${{ ftp.kavecondo.com }}
-        user: ${{ kavecondo }}
+        host: ftp.kavecondo.com
+        user: kavecondo
         password: ${{ secrets.KAVE_PWD }}
         remoteDir: "/domains/kavecondo.com/public_html/test_deploy/"

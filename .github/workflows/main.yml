@@ -1,20 +1,19 @@
-on: 
+name: CI -> Deploy to My website
+on:
   push:
-    branches: ['deploy']
-name: 🚀 Deploy website on push
+    branches: [ deploy ]
 jobs:
-  web-deploy:
-    name: 🎉 Deploy
+  build:
     runs-on: ubuntu-latest
     steps:
-    - name: 🚚 Get latest code
-      uses: actions/checkout@v3
-    
-    - name: 📂 Sync files
-      uses: SamKirkland/FTP-Deploy-Action@4.3.3
-      with:
-        server: 122.155.187.24
-        username: kavecondo
-        password: ${{ secrets.KAVE_PWD }}
-        server-dir: public_html/test_deploy/
-        timeout: 60000
+      - uses: actions/checkout@v2
+      # Here is the deployment action
+      - name: Upload from public_html via FTP
+        uses: kritsadaskt/asw-cf7-cis-api@deploy
+        with:
+          server: ftp.kavecondo.com
+          user: kavecondo
+          password: ${{ secrets.KAVE_PWD }}
+          remote_dir: "./public_html/test_deploy"
+          delete: "false"
+          

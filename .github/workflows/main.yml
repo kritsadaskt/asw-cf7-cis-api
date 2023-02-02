@@ -17,3 +17,4 @@ jobs:
         username: kavecondo
         password: ${{ secrets.KAVE_PWD }}
         server-dir: public_html/test_deploy/
+        timeout: 60000

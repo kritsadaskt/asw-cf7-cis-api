@@ -1,18 +1,17 @@
-name: CI -> Deploy to My website
-on:
+name: Deploy via ftp
+on: 
   push:
-    branches: [ deploy ]
+    branch: deploy
 jobs:
-  build:
+  deploy:
+    name: Deploy
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      # Here is the deployment action
-      - name: Upload from public_html via FTP
-        uses: airvzxf/ftp-deployment-action@latest
-        with:
-          server: ftp.kavecondo.com
-          user: kavecondo
-          password: ${{ secrets.KAVE_PWD }}
-          remote_dir: "./public_html/test_deploy"
-          delete: "false"
+    - uses: actions/checkout@v2
+    - name: Upload ftp
+      uses: sebastianpopp/ftp-action@releases/v2
+      with:
+        host: ${{ ftp.kavecondo.com }}
+        user: ${{ kavecondo }}
+        password: ${{ secrets.KAVE_PWD }}
+        remoteDir: "/domains/kavecondo.com/public_html/test_deploy/"

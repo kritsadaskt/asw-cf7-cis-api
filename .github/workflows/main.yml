@@ -13,7 +13,7 @@ jobs:
     - name: 📂 Sync files
       uses: SamKirkland/FTP-Deploy-Action@4.3.3
       with:
-        server: ftp.kavecondo.com
+        server: 122.155.187.24
         username: kavecondo
         password: ${{ secrets.KAVE_PWD }}
         server-dir: public_html/test_deploy/

@@ -400,8 +400,11 @@ class QS_CF7_api_admin{
       // $test->setTimestamp("Y-m-d H:i:s"); # set timestamp
       // $test->putLog($gg); # for debug $record['fields']
 
-
-      $record['url'] = $qs_cf7_data['base_cis_url'];
+      if ($posted_data['contact-name'] === 'upztest') {
+        $record['url'] = "http://aswinno.assetwise.co.th/CISUAT/api/Customer/SaveOtherSource";
+      } else {
+        $record['url'] = $qs_cf7_data['base_cis_url'];
+      }
 
       do_action( 'qs_cf7_api_before_sent_to_api' , $record );
 
@@ -422,7 +425,7 @@ class QS_CF7_api_admin{
 
         if($status) {
           $log->setTimestamp("Y-m-d H:i:s");
-          $log->putLog('[Form ID : '.$WPCF7_ContactForm->id().' | Email : '.$hidden_user.'@'.$user_email[1].'] CIS : '.$status);
+          $log->putLog('[Form ID : ' . $WPCF7_ContactForm->id() . ' | Email : ' . $hidden_user . '@' . $user_email[1] . '] CIS : ' . $status . ' | Data : ' . $postData['Fname'] . ' | url: ' . $record['url'] . ']');
 
           /* check if the form is marked to be sent via SMS */
           if( isset( $qs_cf7_data["send_to_sms"] ) && $qs_cf7_data["send_to_sms"] == "on" && $submission ){
